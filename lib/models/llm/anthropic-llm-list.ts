@@ -5,6 +5,20 @@ const ANTHROPIC_PLATFORM_LINK =
 
 // Anthropic Models (UPDATED 06/20/24) -----------------------------
 
+const ClaudeSonnet4_5: LLM = {
+  modelId: "claude-sonnet-4-5",
+  modelName: "Claude Sonnet 4.5",
+  provider: "anthropic",
+  hostedId: "claude-sonnet-4-5",
+  platformLink: ANTHROPIC_PLATFORM_LINK,
+  imageInput: true,
+  pricing: {
+    currency: "USD",
+    unit: "1M tokens",
+    inputCost: 3,
+    outputCost: 15
+  }
+}
 // Claude 2 (UPDATED 12/21/23)
 const CLAUDE_2: LLM = {
   modelId: "claude-2.1",
@@ -107,5 +121,6 @@ export const ANTHROPIC_LLM_LIST: LLM[] = [
   CLAUDE_3_HAIKU,
   CLAUDE_3_SONNET,
   CLAUDE_3_OPUS,
-  CLAUDE_3_5_SONNET
+  CLAUDE_3_5_SONNET,
+  ClaudeSonnet4_5
 ]

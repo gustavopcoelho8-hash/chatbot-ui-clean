@@ -10,6 +10,8 @@ export type LLMID =
 
 // OpenAI Models (UPDATED 5/13/24)
 export type OpenAILLMID =
+  | "gpt-5"
+  | "gpt-4.1"
   | "gpt-4o" // GPT-4o
   | "gpt-4-turbo-preview" // GPT-4 Turbo
   | "gpt-4-vision-preview" // GPT-4 Vision
@@ -22,9 +24,12 @@ export type GoogleLLMID =
   | "gemini-pro-vision" // Gemini Pro Vision
   | "gemini-1.5-pro-latest" // Gemini 1.5 Pro
   | "gemini-1.5-flash" // Gemini 1.5 Flash
+  | "gemini-2.5-pro"
+  | "gemini-2.5-flash"
 
 // Anthropic Models
 export type AnthropicLLMID =
+  | "claude-sonnet-4-5"
   | "claude-2.1" // Claude 2
   | "claude-instant-1.2" // Claude Instant
   | "claude-3-haiku-20240307" // Claude 3 Haiku
