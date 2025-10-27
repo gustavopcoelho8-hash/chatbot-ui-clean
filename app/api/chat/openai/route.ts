@@ -32,7 +32,7 @@ export async function POST(request: Request) {
         chatSettings.model === "gpt-4-vision-preview" ||
         chatSettings.model === "gpt-4o"
           ? 4096
-          : null, // TODO: Fix
+          : undefined, // TODO: Fix
       stream: true
     })
 

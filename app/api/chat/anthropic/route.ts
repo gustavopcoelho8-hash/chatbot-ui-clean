@@ -17,13 +17,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const profile = await getServerProfile()
-
     checkApiKey(profile.anthropic_api_key, "Anthropic")
 
-    let ANTHROPIC_FORMATTED_MESSAGES: any = messages.slice(1)
-
-    ANTHROPIC_FORMATTED_MESSAGES = ANTHROPIC_FORMATTED_MESSAGES?.map(
-      (message: any) => {
+    // ✅ Format messages for Anthropic API
+    const ANTHROPIC_FORMATTED_MESSAGES = messages
+      .slice(1)
+      .map((message: any) => {
         const messageContent =
           typeof message?.content === "string"
             ? [message.content]
@@ -33,7 +32,6 @@ export async function POST(request: NextRequest) {
           ...message,
           content: messageContent.map((content: any) => {
             if (typeof content === "string") {
-              // Handle the case where content is a string
               return { type: "text", text: content }
             } else if (
               content?.type === "image_url" &&
@@ -52,49 +50,37 @@ export async function POST(request: NextRequest) {
             }
           })
         }
-      }
-    )
+      })
 
     const anthropic = new Anthropic({
       apiKey: profile.anthropic_api_key || ""
     })
 
-    try {
-      const response = await anthropic.messages.create({
-        model: chatSettings.model,
-        messages: ANTHROPIC_FORMATTED_MESSAGES,
-        temperature: chatSettings.temperature,
-        system: messages[0].content,
-        max_tokens:
-          CHAT_SETTING_LIMITS[chatSettings.model].MAX_TOKEN_OUTPUT_LENGTH,
-        stream: true
-      })
+    // ✅ Always define a valid max_tokens (integer)
+    const maxTokens =
+      CHAT_SETTING_LIMITS?.[chatSettings.model]?.MAX_TOKEN_OUTPUT_LENGTH || 4096
 
-      try {
-        const stream = AnthropicStream(response)
-        return new StreamingTextResponse(stream)
-      } catch (error: any) {
-        console.error("Error parsing Anthropic API response:", error)
-        return new NextResponse(
-          JSON.stringify({
-            message:
-              "An error occurred while parsing the Anthropic API response"
-          }),
-          { status: 500 }
-        )
-      }
-    } catch (error: any) {
-      console.error("Error calling Anthropic API:", error)
-      return new NextResponse(
-        JSON.stringify({
-          message: "An error occurred while calling the Anthropic API"
-        }),
-        { status: 500 }
-      )
-    }
+    // ✅ Build payload safely
+    const response = await anthropic.messages.create({
+      model: chatSettings.model,
+      messages: ANTHROPIC_FORMATTED_MESSAGES,
+      temperature: chatSettings.temperature ?? 0.7,
+      system: messages[0]?.content ?? "You are a helpful assistant.",
+      max_tokens: maxTokens,
+      stream: true
+    })
+
+    // ✅ Handle streaming response
+    const stream = AnthropicStream(response)
+    return new StreamingTextResponse(stream)
   } catch (error: any) {
-    let errorMessage = error.message || "An unexpected error occurred"
-    const errorCode = error.status || 500
+    console.error("🔥 Anthropic route error:", error)
+
+    let errorMessage =
+      error?.error?.message ||
+      error?.message ||
+      "An unexpected error occurred with Anthropic."
+    const errorCode = error?.status || 500
 
     if (errorMessage.toLowerCase().includes("api key not found")) {
       errorMessage =
